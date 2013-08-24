@@ -1109,6 +1109,13 @@ endif
 ifdef INSTALLED_KERNEL_TARGET
 	$(hide) $(ACP) $(INSTALLED_KERNEL_TARGET) $(zip_root)/BOOT/kernel
 endif
+ifdef INSTALLED_RAMDISK_TARGET
+	$(hide) $(ACP) $(INSTALLED_RAMDISK_TARGET) $(zip_root)/BOOT/ramdisk.img
+endif
+ifdef INSTALLED_BOOTLOADER_MODULE
+	$(hide) $(ACP) \
+		$(INSTALLED_BOOTLOADER_MODULE) $(zip_root)/BOOT/bootloader
+endif
 ifdef INSTALLED_2NDBOOTLOADER_TARGET
 	$(hide) $(ACP) \
 		$(INSTALLED_2NDBOOTLOADER_TARGET) $(zip_root)/BOOT/second
@@ -1121,6 +1128,12 @@ ifdef BOARD_KERNEL_BASE
 endif
 ifdef BOARD_KERNEL_PAGESIZE
 	$(hide) echo "$(BOARD_KERNEL_PAGESIZE)" > $(zip_root)/BOOT/pagesize
+endif
+ifdef BOARD_FORCE_RAMDISK_ADDRESS
+	$(hide) echo "$(BOARD_FORCE_RAMDISK_ADDRESS)" > $(zip_root)/BOOT/ramdiskaddr
+endif
+ifdef ZIP_SAVE_UBOOTIMG_ARGS
+	$(hide) echo "$(ZIP_SAVE_UBOOTIMG_ARGS)" > $(zip_root)/BOOT/ubootargs
 endif
 	$(hide) $(foreach t,$(INSTALLED_RADIOIMAGE_TARGET),\
 	            mkdir -p $(zip_root)/RADIO; \
@@ -1197,6 +1210,12 @@ INTERNAL_OTA_PACKAGE_TARGET := $(PRODUCT_OUT)/$(name).zip
 
 $(INTERNAL_OTA_PACKAGE_TARGET): KEY_CERT_PAIR := $(DEFAULT_KEY_CERT_PAIR)
 
+ifeq ($(TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT),)
+    OTA_FROM_TARGET_SCRIPT := ./build/tools/releasetools/ota_from_target_files
+else
+    OTA_FROM_TARGET_SCRIPT := $(TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT)
+endif
+
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(OTATOOLS) $(SELINUX_DEPENDS)
 	@echo "Package OTA: $@"
 	$(hide) ./build/tools/releasetools/ota_from_target_files -v \
@@ -1224,6 +1243,12 @@ ifeq ($(TARGET_RELEASETOOLS_EXTENSIONS),)
 $(INTERNAL_UPDATE_PACKAGE_TARGET): extensions := $(TARGET_DEVICE_DIR)/../common
 else
 $(INTERNAL_UPDATE_PACKAGE_TARGET): extensions := $(TARGET_RELEASETOOLS_EXTENSIONS)
+endif
+
+ifeq ($(TARGET_RELEASETOOL_IMG_FROM_TARGET_SCRIPT),)
+    IMG_FROM_TARGET_SCRIPT := ./build/tools/releasetools/img_from_target_files
+else
+    IMG_FROM_TARGET_SCRIPT := $(TARGET_RELEASETOOL_IMG_FROM_TARGET_SCRIPT)
 endif
 
 $(INTERNAL_UPDATE_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(OTATOOLS) $(SELINUX_DEPENDS)
