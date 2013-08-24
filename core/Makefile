@@ -388,14 +388,6 @@ INTERNAL_BOOTIMAGE_ARGS += --genext2fs $(MKEXT2IMG)
 $(INSTALLED_BOOTIMAGE_TARGET): $(MKEXT2IMG) $(INTERNAL_BOOTIMAGE_FILES)
 	$(call pretty,"Target boot image: $@")
 	$(hide) $(MKEXT2BOOTIMG) $(INTERNAL_BOOTIMAGE_ARGS) --output $@
-
-ifeq ($(TARGET_BOOTIMAGE_USE_EXT2),true)
-tmp_dir_for_image := $(call intermediates-dir-for,EXECUTABLES,boot_img)/bootimg
-INTERNAL_BOOTIMAGE_ARGS += --tmpdir $(tmp_dir_for_image)
-INTERNAL_BOOTIMAGE_ARGS += --genext2fs $(MKEXT2IMG)
-$(INSTALLED_BOOTIMAGE_TARGET): $(MKEXT2IMG) $(INTERNAL_BOOTIMAGE_FILES)
-	$(call pretty,"Target boot image: $@")
-	$(hide) $(MKEXT2BOOTIMG) $(INTERNAL_BOOTIMAGE_ARGS) --output $@
 	@echo -e ${CL_INS}"Made boot image: $@"${CL_RST}
 
 else ifndef BOARD_CUSTOM_BOOTIMG_MK # TARGET_BOOTIMAGE_USE_EXT2 != true
