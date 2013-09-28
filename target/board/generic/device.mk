@@ -23,8 +23,8 @@ PRODUCT_PROPERTY_OVERRIDES := \
     ro.adb.qemud=1
 
 PRODUCT_COPY_FILES := \
-    development/data/etc/vold.conf:system/etc/vold.conf \
-    development/tools/emulator/system/camera/media_profiles.xml:system/etc/media_profiles.xml \
+    vendor/neoh/files/vold.conf:system/etc/vold.conf \
+    vendor/neoh/files/media_profiles.xml:system/etc/media_profiles.xml \
 
 PRODUCT_PACKAGES := \
     audio.primary.goldfish
