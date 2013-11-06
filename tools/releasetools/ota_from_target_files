@@ -304,6 +304,35 @@ def CopySystemFiles(input_zip, output_zip=None,
   symlinks.sort()
   return (symlinks, retouch_files)
 
+def CopyDataFiles(input_zip, output_zip=None,
+                    substitute=None):
+  """Copies files underneath system/ in the input zip to the output
+  zip.  Populates the Item class with their metadata, and returns a
+  list of symlinks as well as a list of files that will be retouched.
+  output_zip may be None, in which case the copy is skipped (but the
+  other side effects still happen).  substitute is an optional dict
+  of {output filename: contents} to be output instead of certain input
+  files.
+  """
+
+  for info in input_zip.infolist():
+    if info.filename.startswith("DATA/"):
+      basefilename = info.filename[5:]
+      info2 = copy.copy(info)
+      fn = info2.filename = "data/" + basefilename
+      if substitute and fn in substitute and substitute[fn] is None:
+        continue
+      if output_zip is not None:
+        if substitute and fn in substitute:
+          data = substitute[fn]
+        else:
+          data = input_zip.read(info.filename)
+        output_zip.writestr(info2, data)
+      if fn.endswith("/"):
+        Item.Get(fn[:-1], dir=True)
+      else:
+        Item.Get(fn, dir=False)
+  return ()
 
 def SignOutput(temp_zip_name, output_zip_name):
   key_passwords = common.GetKeyPasswords([OPTIONS.package_key])
@@ -403,6 +432,7 @@ def WriteFullOTAPackage(input_zip, output_zip):
   script.UnpackPackageDir("system", "/system")
 
   (symlinks, retouch_files) = CopySystemFiles(input_zip, output_zip)
+	CopyDataFiles(input_zip, output_zip)
   script.MakeSymlinks(symlinks)
   if OPTIONS.aslr_mode:
     script.RetouchBinaries(retouch_files)
@@ -430,6 +460,8 @@ def WriteFullOTAPackage(input_zip, output_zip):
 
   if OPTIONS.extra_script is not None:
     script.AppendExtra(OPTIONS.extra_script)
+
+  script.SetPermissionsRecursive("/system/b2g", 0, 2000, 0755, 0755)
 
   script.UnmountAll()
   script.AddToZip(input_zip, output_zip)
