@@ -355,12 +355,7 @@ def SignFile(input_name, output_name, key, password, align=None,
   else:
     sign_name = output_name
 
-  cmd = ["java", "-Xmx2048m", "-jar",
-           os.path.join(OPTIONS.search_path, "framework", "signapk.jar")]
-  if whole_file:
-    cmd.append("-w")
-  cmd.extend([key + ".x509.pem", key + ".pk8",
-              input_name, sign_name])
+  cmd = ["cp", input_name, sign_name]
 
   p = Run(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
   if password is not None:
