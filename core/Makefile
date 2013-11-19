@@ -1218,12 +1218,19 @@ else
     OTA_FROM_TARGET_SCRIPT := $(TARGET_RELEASETOOL_OTA_FROM_TARGET_SCRIPT)
 endif
 
+ifeq ($(TARGET_OTA_ASSERT_DEVICE),)
+    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := auto
+else
+    $(INTERNAL_OTA_PACKAGE_TARGET): override_device := $(TARGET_OTA_ASSERT_DEVICE)
+endif
+
 $(INTERNAL_OTA_PACKAGE_TARGET): $(BUILT_TARGET_FILES_PACKAGE) $(OTATOOLS) $(SELINUX_DEPENDS)
 	@echo "Package OTA: $@"
 	$(hide) $(OTA_FROM_TARGET_SCRIPT) -v \
 	   $(if $(filter true, $(strip $(HAVE_SELINUX))),-S $(TARGET_ROOT_OUT)/file_contexts) \
 	   -p $(HOST_OUT) \
 	   -k $(KEY_CERT_PAIR) \
+	   --override_device=$(override_device) \
 	   $(BUILT_TARGET_FILES_PACKAGE) $@
 
 .PHONY: otapackage
